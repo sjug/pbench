@@ -619,6 +619,29 @@ _known_csv_handlers = {
         }
     },
     'sar': {},
+    'haproxy-ocp': {
+        '@prospectus': {
+            # For haproxy-ocp .csv files, we want to individually index
+            # each column entry as its own JSON document
+            'handling': 'unify'
+        },
+        'req_rate_req_rate: HTTP requests per second over last elapsed second.csv': {
+            'class': 'haproxy-ocp',
+            'metric': 'req_rate',
+            'display': 'Request_Rate',
+            'units': 'count_per_second',
+            'subfields': [],
+            'colpat': re.compile(r'(?P<id>.+)')
+        },
+        'scur_scur: current sessions.csv': {
+            'class': 'haproxy-ocp',
+            'metric': 'scur',
+            'display': 'Current_Sessions',
+            'units': 'count',
+            'subfields': [],
+            'colpat': re.compile(r'(?P<id>.+)')
+        }
+    },
     'turbostat': {},
 }
 
@@ -888,8 +911,12 @@ class ToolData(object):
         for p in paths:
             fname = os.path.basename(p)
             try:
-                handler_rec = handler[fname]
-            except KeyError:
+                for key, value in handler.items():
+                    if key.endswith('.csv') and fname.endswith(key):
+                        handler_rec = value
+                #handler_rec = [value for key, value in handler.items() if key.endswith('.csv') and fname.endswith(fname)]
+                test = handler_rec
+            except UnboundLocalError:
                 # Try an alias
                 alias_name = fname
                 try:
@@ -897,7 +924,7 @@ class ToolData(object):
                     handler_rec = handler[fname]
                 except KeyError:
                     # Ignore .csv files for which we don't have a handler
-                    #print("WARNING: no .csv handler for %s\n" % (p,), file=sys.stdout)
+                    print("WARNING: no .csv handler for %s\n" % (p,), file=sys.stdout)
                     continue
             datafile = { "path": p, "basename": fname, 'handler': handler_rec }
             # FIXME: we might have to deal with UTF-8 decoding issues
