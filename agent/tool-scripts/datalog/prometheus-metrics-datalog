@@ -16,7 +16,7 @@ while True:
     if (cert == "None") or (key == "None"):
         command = "prom2json http://%s:%d/metrics" % (host, port)
     else:
-        command = "prom2json --cert=%s --key=%s https://%s:%d/metrics" % (cert, key, host, port)
+        command = "prom2json --accept-invalid-cert --cert=%s --key=%s https://%s:%d/metrics" % (cert, key, host, port)
     command_out = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     prom2json_out = command_out.communicate()[0]
     metrics_list = json.loads(prom2json_out)
