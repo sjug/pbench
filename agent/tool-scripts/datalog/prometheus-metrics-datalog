@@ -9,14 +9,15 @@ host = sys.argv[1]
 tool_log = sys.argv[3]
 port = int(sys.argv[4])
 cert = sys.argv[5]
-key = sys.argv[6]
+selfsigned = sys.argv[6]
+key = sys.argv[7]
 while True:
     time_stamp = int(time.time())
     next_start = time_stamp + interval
     if (cert == "None") or (key == "None"):
         command = "prom2json http://%s:%d/metrics" % (host, port)
     else:
-        command = "prom2json --accept-invalid-cert --cert=%s --key=%s https://%s:%d/metrics" % (cert, key, host, port)
+        command = "prom2json %s --cert=%s --key=%s https://%s:%d/metrics" % ("--accept-invalid-cert" if selfsigned == "true" else "", cert, key, host, port)
     command_out = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     prom2json_out = command_out.communicate()[0]
     metrics_list = json.loads(prom2json_out)
