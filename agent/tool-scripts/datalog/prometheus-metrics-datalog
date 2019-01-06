@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 import time
-import sys, json
+import sys, json, math
 import os, subprocess, warnings, logging
 
 interval = int(sys.argv[2])
@@ -49,6 +49,7 @@ while True:
     # Record how long all the work took during this interval.
     endtime = time.time()
 
+    intervals += 1
     duration = endtime - time_stamp
     total_duration += duration
     avg_duration = total_duration / intervals
@@ -60,7 +61,7 @@ while True:
         drifted += 1
         logging.warn("[prometheus-metrics-datalog] interval exceeded now %d times: [interval: %d, start: %d, duration: %d, prom2json: %d]; please consider changing the interval to at least %d seconds\n" % (
                 drifted, interval, time_stamp, duration,
-                end_cmd_time_stamp - time_stamp, int(avg_duration * 1.5))
+                end_cmd_time_stamp - time_stamp, int(math.ceil(avg_duration * 1.5))))
         # The current time, endtime, is now the end of this interval.
         next_start = endtime
 
